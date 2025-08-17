@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { SolanaProvider } from "@/components/provider/Solana";
+import { Navbar } from "@/components/dashboard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,7 +30,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SolanaProvider>{children}</SolanaProvider>
+        <SolanaProvider>
+           <div className="flex h-screen bg-neutral-950 text-white">
+                <Navbar />
+                <main className="flex-1 overflow-y-auto">
+                  {children}
+                </main>
+              </div>
+          </SolanaProvider>
         </body>
     </html>
   );
