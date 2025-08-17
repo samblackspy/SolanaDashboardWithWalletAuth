@@ -1,4 +1,5 @@
 import { WalletButton } from "@/components/dashboard/WalletButton";
+import { Balance } from "@/components/dashboard/Balance";
 export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-gradient-to-b from-gray-950 via-gray-900 to-black">
@@ -14,6 +15,7 @@ export default function Home() {
         <WalletButton />
       </div>
 
+      <Balance />
     </div>
   );
 }
