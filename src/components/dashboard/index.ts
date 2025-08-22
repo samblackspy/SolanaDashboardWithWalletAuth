@@ -1,6 +1,5 @@
-export { WalletOverviewPage } from "./WalletOverview"
-export { TokenManagementPage } from "../Tokens/TokenManagement"
-export { StakingPage } from "../Staking/Staking"
-export { Navbar } from "./Navbar"
-export { WalletButton } from "./WalletButton"
-export { Balance } from "./Balance"
+export { WalletOverview } from "./WalletOverview";
+export { TokenManagement } from "./TokenManagement";
+export { Sidebar } from "./Sidebar";
+export { WalletConnectButton } from "./WalletConnectButton";
+export { Balance } from "./Balance";

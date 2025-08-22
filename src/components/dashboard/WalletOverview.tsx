@@ -1,16 +1,13 @@
-"use client"
+"use client";
+import { Balance } from "./Balance";
+import { Transactions } from "./Transactions";
+import { NetworkStatus } from "./NetworkStatus";
+import { NftShowcase } from "./NftShowcase";
+import { PortfolioOverview } from "./PortfolioOverview";
 
-import { Card, CardContent, CardHeader, CardTitle, Button } from "@/components/ui"
-import { Activity, TrendingUp, Clock } from "lucide-react"
-import { Balance } from "./Balance"
-import { Transactions } from "./Transactions"
-import { PortfolioPerformance } from "./PortfolioPerformance"
-import { StakingOverview } from "./StakingOverview"
-import { QuickActions } from "./QuickActions"
-
-export function WalletOverviewPage() {
+export const WalletOverview = () => {
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 text-white bg-neutral-950 min-h-full">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4">
           <Balance />
@@ -18,23 +15,17 @@ export function WalletOverviewPage() {
         <div className="lg:col-span-4">
           <Transactions />
         </div>
+
         <div className="lg:col-span-4">
-          <PortfolioPerformance />
+          <NetworkStatus />
         </div>
-        
-         
-      </div>
-      
-      
-      <div className="grid grid-cols-1 lg:grid-cols-8 gap-6">
-        <div className="lg:col-span-5">
-          <StakingOverview />
+        <div className="lg:col-span-12">
+          <PortfolioOverview />
         </div>
-        
-        <div className="lg:col-span-3">
-         <QuickActions />
+        <div className="lg:col-span-12">
+          <NftShowcase />
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

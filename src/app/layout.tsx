@@ -1,23 +1,24 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Geist, Geist_Mono } from "next/font/google";
+
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { SolanaProvider } from "@/components/provider/Solana";
-import { Navbar } from "@/components/dashboard";
+import { Toaster } from "@/components/ui/sonner";
+import { DashboardDataProvider } from "@/context/DashboardDataProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
   title: "Solana Dashboard with Wallet Authentication",
-  description: "A Solana dashboard with wallet authentication and transaction capabilities",
+  description:
+    "A Solana dashboard with wallet authentication and transaction capabilities",
 };
 
 export default function RootLayout({
@@ -28,17 +29,27 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
       >
         <SolanaProvider>
-           <div className="flex h-screen bg-neutral-950 text-white">
-                <Navbar />
-                <main className="flex-1 overflow-y-auto">
-                  {children}
-                </main>
-              </div>
-          </SolanaProvider>
-        </body>
+          <DashboardDataProvider>{children}</DashboardDataProvider>
+        </SolanaProvider>
+
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            classNames: {
+              toast:
+                "bg-neutral-900 border border-neutral-700 text-neutral-100 shadow-lg",
+              title: "text-white font-semibold",
+              description: "text-neutral-400",
+              error: "!bg-red-950 !border-red-500/50 !text-red-100",
+              success: "!bg-green-950 !border-green-500/50 !text-green-100",
+              info: "!bg-blue-950 !border-blue-500/50 !text-blue-100",
+            },
+          }}
+        />
+      </body>
     </html>
   );
 }
