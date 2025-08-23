@@ -12,8 +12,12 @@ import React, {
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "sonner";
 import { apiService } from "@/services/apiService";
-import { parseHeliusTransaction } from "@/utils/transactions";
+import {
+  parseHeliusTransaction,
+  HeliusApiTransaction,
+} from "@/utils/transactions";
 import { PublicKey } from "@solana/web3.js";
+import { HeliusAsset } from "@/types/helius";
 
 export interface TokenData {
   id: string;
@@ -31,8 +35,7 @@ export interface NftData {
   symbol: string;
   imageUrl?: string;
 }
-export interface TransactionData
-  extends ReturnType<typeof parseHeliusTransaction> {}
+export type TransactionData = ReturnType<typeof parseHeliusTransaction>;
 export interface NetworkStatusData {
   absoluteSlot: number;
   blockHeight: number;
@@ -130,15 +133,13 @@ export const DashboardDataProvider = ({
         return;
       }
       const networkData = await apiService.getNetworkStatus(apiKey);
-      if (networkData) {
+      if (networkData)
         setNetworkStatus({
           ...networkData,
           slotIndex: networkData.absoluteSlot % 432000,
           slotsInEpoch: 432000,
         });
-      } else {
-        setNetworkStatus(null);
-      }
+      else setNetworkStatus(null);
     };
     fetchNetwork();
   }, [apiKey]);
@@ -194,9 +195,9 @@ export const DashboardDataProvider = ({
             : 0
         );
         const formattedNfts = nftsData
-          .filter((n: any) => n.content?.links?.image)
+          .filter((n: HeliusAsset) => n.content?.links?.image)
           .map(
-            (n: any): NftData => ({
+            (n: HeliusAsset): NftData => ({
               id: n.id,
               name: n.content?.metadata?.name || "Unnamed",
               symbol: n.content?.metadata?.symbol || "",
@@ -204,10 +205,14 @@ export const DashboardDataProvider = ({
             })
           );
         setNfts(formattedNfts);
+
         const parsedTransactions = transactionsData
-          .map((tx: any) => parseHeliusTransaction(tx, effectiveKey.toBase58()))
+          .map((tx: HeliusApiTransaction) =>
+            parseHeliusTransaction(tx, effectiveKey.toBase58())
+          )
           .filter(Boolean) as TransactionData[];
         setTransactions(parsedTransactions);
+
         if (parsedTransactions.length < TX_PAGE_LIMIT) {
           setHasMoreTransactions(false);
         } else {
@@ -218,11 +223,13 @@ export const DashboardDataProvider = ({
         }
         setLastSync(new Date());
         if (isRefreshing) toast.success("Data refreshed!");
-      } catch (e: any) {
+      } catch (e: unknown) {
+        const errorMessage =
+          e instanceof Error ? e.message : "An unknown error occurred.";
         console.error("Failed to fetch dashboard data:", e);
-        setError(e.message);
+        setError(errorMessage);
         toast.error("Failed to load dashboard data.", {
-          description: e.message,
+          description: errorMessage,
         });
       } finally {
         setIsLoading(false);
@@ -247,7 +254,9 @@ export const DashboardDataProvider = ({
       });
       if (newTxData && newTxData.length > 0) {
         const parsedNewTxs = newTxData
-          .map((tx: any) => parseHeliusTransaction(tx, effectiveKey.toBase58()))
+          .map((tx: HeliusApiTransaction) =>
+            parseHeliusTransaction(tx, effectiveKey.toBase58())
+          )
           .filter(Boolean) as TransactionData[];
         setTransactions((p) => {
           const combined = [...p, ...parsedNewTxs];
@@ -292,6 +301,7 @@ export const DashboardDataProvider = ({
       return false;
     }
   };
+
   const handleSetViewOnlyKey = (keyStr: string) => {
     try {
       const newKey = new PublicKey(keyStr);
@@ -300,7 +310,7 @@ export const DashboardDataProvider = ({
       toast.success(
         `Now viewing wallet: ${keyStr.slice(0, 4)}...${keyStr.slice(-4)}`
       );
-    } catch (error) {
+    } catch {
       toast.error("Invalid public key entered.");
     }
   };

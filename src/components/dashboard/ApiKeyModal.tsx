@@ -25,10 +25,8 @@ export function ApiKeyModal() {
       toast.error("Please enter a valid Helius API key.");
       return;
     }
-
     setIsValidating(true);
     const success = await setApiKey(inputValue.trim());
-
     if (!success) {
       setIsValidating(false);
     }
@@ -44,7 +42,8 @@ export function ApiKeyModal() {
           </CardTitle>
           <CardDescription>
             Please provide your Helius API key to proceed. This key will be
-            saved securely in your browser's local storage for future visits.
+            saved securely in your browser&apos;s local storage for future
+            visits.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -63,7 +62,7 @@ export function ApiKeyModal() {
             rel="noopener noreferrer"
             className="text-xs text-purple-400 hover:underline mt-2 inline-block"
           >
-            Don't have a key? Get one for free at Helius.
+            Don&apos;t have a key? Get one for free at Helius.
           </a>
         </CardContent>
         <CardFooter>

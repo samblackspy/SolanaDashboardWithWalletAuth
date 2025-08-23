@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Skeleton } from "./skeleton";
 
-interface LazyImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {}
+export type LazyImageProps = React.ImgHTMLAttributes<HTMLImageElement>;
 
 export function LazyImage({ src, alt, className, ...props }: LazyImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -18,9 +18,11 @@ export function LazyImage({ src, alt, className, ...props }: LazyImageProps) {
   };
 
   return (
-    <div ref={ref} className={`relative ${className}`}>
+    <div ref={ref} className={`relative overflow-hidden ${className}`}>
       {!isLoaded && <Skeleton className="absolute inset-0" />}
+
       {inView && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
           alt={alt}

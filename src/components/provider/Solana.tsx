@@ -20,7 +20,7 @@ export const SolanaProvider: FC<SolanaProviderProps> = ({ children }) => {
 
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
-  const wallets = useMemo(() => [], [network]);
+  const wallets = useMemo(() => [], []);
 
   return (
     <ConnectionProvider endpoint={endpoint}>

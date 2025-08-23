@@ -27,14 +27,10 @@ interface ChartDataPoint {
   value: number;
 }
 
-interface CustomPieLabelProps extends PieLabelRenderProps {
-  cx: number;
-  cy: number;
-  midAngle: number;
-  innerRadius: number;
-  outerRadius: number;
-  percent: number;
-  index: number;
+interface LegendFormatterEntry {
+  payload?: {
+    value?: number;
+  };
 }
 
 export const TokenAllocation = () => {
@@ -42,42 +38,43 @@ export const TokenAllocation = () => {
 
   const chartData = useMemo<ChartDataPoint[]>(() => {
     if (!tokens || tokens.length === 0) return [];
-
     const sortedTokens = [...tokens].sort((a, b) => b.value - a.value);
     const topTokens = sortedTokens.slice(0, 6);
     const otherValue = sortedTokens
       .slice(6)
       .reduce((sum, t) => sum + t.value, 0);
-
     const chartItems = topTokens
       .filter((t) => t.value > 0)
       .map((token) => ({
         name: token.symbol,
         value: parseFloat(token.value.toFixed(2)),
       }));
-
     if (otherValue > 0) {
       chartItems.push({
         name: "Others",
         value: parseFloat(otherValue.toFixed(2)),
       });
     }
-
     return chartItems;
   }, [tokens]);
 
-  const renderCustomizedLabel = ({
-    cx,
-    cy,
-    midAngle,
-    innerRadius,
-    outerRadius,
-    percent,
-  }: CustomPieLabelProps) => {
+  const renderCustomizedLabel = (props: PieLabelRenderProps) => {
+    const { cx, cy, midAngle, innerRadius, outerRadius, percent } = props;
+    if (
+      percent === undefined ||
+      innerRadius === undefined ||
+      outerRadius === undefined ||
+      cx === undefined ||
+      cy === undefined ||
+      midAngle === undefined
+    )
+      return null;
+
     const RADIAN = Math.PI / 180;
-    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    const r =
+      Number(innerRadius) + (Number(outerRadius) - Number(innerRadius)) * 0.5;
+    const x = Number(cx) + r * Math.cos(-Number(midAngle) * RADIAN);
+    const y = Number(cy) + r * Math.sin(-Number(midAngle) * RADIAN);
 
     if (percent < 0.05) return null;
 
@@ -86,7 +83,7 @@ export const TokenAllocation = () => {
         x={x}
         y={y}
         fill="white"
-        textAnchor={x > cx ? "start" : "end"}
+        textAnchor={x > Number(cx) ? "start" : "end"}
         dominantBaseline="central"
         className="text-xs font-bold"
       >
@@ -95,32 +92,18 @@ export const TokenAllocation = () => {
     );
   };
 
-  const renderLegendText = (value: string, entry: any) => {
-    const payload = entry.payload as ChartDataPoint;
+  const renderLegendText = (value: string, entry: LegendFormatterEntry) => {
+    const numericValue = entry.payload?.value;
     const displayValue =
-      payload?.value?.toLocaleString(undefined, {
+      numericValue?.toLocaleString(undefined, {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }) || "0.00";
-
     return (
       <span className="text-xs text-neutral-300">
         {value}: ${displayValue}
       </span>
     );
-  };
-
-  const renderCustomizedLabelWrapper = (props: any) => {
-    return renderCustomizedLabel({
-      ...props,
-      cx: Number(props.cx) || 0,
-      cy: Number(props.cy) || 0,
-      midAngle: Number(props.midAngle) || 0,
-      innerRadius: Number(props.innerRadius) || 0,
-      outerRadius: Number(props.outerRadius) || 0,
-      percent: Number(props.percent) || 0,
-      index: 0,
-    });
   };
 
   if (isLoading && tokens.length === 0) {
@@ -167,13 +150,14 @@ export const TokenAllocation = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={renderCustomizedLabelWrapper}
+                  label={renderCustomizedLabel}
                   outerRadius={80}
                   innerRadius={40}
                   paddingAngle={2}
                   dataKey="value"
+                  nameKey="name"
                 >
-                  {chartData.map((_, index) => (
+                  {chartData.map((_item, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}

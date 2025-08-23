@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, ComponentPropsWithoutRef } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import {
   LAMPORTS_PER_SOL,
@@ -38,6 +38,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+interface ActionButtonProps extends ComponentPropsWithoutRef<typeof Button> {
+  tooltip: string;
+  disabledTooltip?: string;
+}
+
 export const QuickActions = () => {
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
@@ -61,25 +66,21 @@ export const QuickActions = () => {
       toast.error("Cannot send transactions in view-only mode.");
       return;
     }
-
     let recipientPubKey: PublicKey;
     try {
       recipientPubKey = new PublicKey(recipient);
-    } catch (err) {
+    } catch {
       toast.error("Invalid recipient address.");
       return;
     }
-
     const lamports = parseFloat(amount) * LAMPORTS_PER_SOL;
     if (isNaN(lamports) || lamports <= 0) {
       toast.error("Invalid amount.");
       return;
     }
-
     setIsSending(true);
     setSignature("");
     setError("");
-
     try {
       const { blockhash } = await connection.getLatestBlockhash();
       const messageV0 = new TransactionMessage({
@@ -95,22 +96,22 @@ export const QuickActions = () => {
       }).compileToV0Message();
       const transaction = new VersionedTransaction(messageV0);
       const txSignature = await sendTransaction(transaction, connection);
-
       setSignature(txSignature);
       toast.success("Transaction sent successfully!");
       await connection.confirmTransaction(txSignature, "confirmed");
       toast.success("Transaction confirmed!");
-
       setTimeout(() => {
         setSendOpen(false);
         setRecipient("");
         setAmount("");
         setSignature("");
       }, 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Transaction failed:", err);
-      setError(err.message || "An unknown error occurred.");
-      toast.error("Transaction failed.", { description: err.message });
+      const errorMessage =
+        err instanceof Error ? err.message : "An unknown error occurred.";
+      setError(errorMessage);
+      toast.error("Transaction failed.", { description: errorMessage });
     } finally {
       setIsSending(false);
     }
@@ -131,9 +132,8 @@ export const QuickActions = () => {
     disabled,
     disabledTooltip,
     ...props
-  }: any) => {
+  }: ActionButtonProps) => {
     const finalDisabled = disabled;
-
     return (
       <TooltipProvider delayDuration={100}>
         <Tooltip>
@@ -238,7 +238,6 @@ export const QuickActions = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <Dialog
         open={receiveOpen}
         onOpenChange={(open) => {
@@ -287,7 +286,6 @@ export const QuickActions = () => {
           )}
         </DialogContent>
       </Dialog>
-
       <ActionButton
         tooltip="Swap"
         disabled={true}

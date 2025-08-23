@@ -4,7 +4,7 @@ import { useDashboard } from "@/context/DashboardDataProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui";
 
 export const NetworkStatus = () => {
-  const { networkStatus, isLoading } = useDashboard();
+  const { networkStatus } = useDashboard();
 
   return (
     <Card className="h-full bg-neutral-900 border-neutral-700">

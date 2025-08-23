@@ -1,5 +1,7 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { HeliusAsset } from "@/types/helius";
+import { TokenData } from "@/context/DashboardDataProvider";
+import { HeliusApiTransaction } from "@/utils/transactions";
 
 export const HELIUS_RPC_URL = (apiKey: string) =>
   `https://mainnet.helius-rpc.com/?api-key=${apiKey}`;
@@ -21,7 +23,7 @@ export const apiService = {
     publicKey: PublicKey,
     connection: Connection,
     apiKey: string
-  ): Promise<any[] | null> {
+  ): Promise<TokenData[] | null> {
     try {
       if (!apiKey) throw new Error("Helius API key is required.");
       const rpcUrl = HELIUS_RPC_URL(apiKey);
@@ -55,11 +57,8 @@ export const apiService = {
           throw new Error(`Helius RPC Error: ${data.error.message}`);
 
         const { result } = data;
-
-        if (result.nativeBalance?.lamports) {
+        if (result.nativeBalance?.lamports)
           solBalanceLamports = result.nativeBalance.lamports;
-        }
-
         if (result.items?.length > 0)
           allHeliusAssets = allHeliusAssets.concat(result.items);
         if (result.items?.length < limit || page > 30) break;
@@ -105,7 +104,10 @@ export const apiService = {
             image: asset.content.links?.image,
           };
         });
-      return [solAsset, ...tokenAssets].sort((a, b) => b.value - a.value);
+      const finalAssets = [solAsset, ...tokenAssets].sort(
+        (a, b) => b.value - a.value
+      );
+      return finalAssets as TokenData[];
     } catch (error) {
       console.error("Failed to get wallet assets:", error);
       return null;
@@ -145,7 +147,10 @@ export const apiService = {
     return allPrices;
   },
 
-  async getNFTs(publicKey: PublicKey, apiKey: string): Promise<any[] | null> {
+  async getNFTs(
+    publicKey: PublicKey,
+    apiKey: string
+  ): Promise<HeliusAsset[] | null> {
     try {
       if (!apiKey) return [];
       const rpcUrl = HELIUS_RPC_URL(apiKey);
@@ -183,7 +188,7 @@ export const apiService = {
     publicKey: PublicKey,
     apiKey: string,
     options: { limit?: number; before?: string } = {}
-  ): Promise<any[] | null> {
+  ): Promise<HeliusApiTransaction[] | null> {
     try {
       if (!apiKey) return [];
       let url = `${HELIUS_API_URL_V0}/addresses/${publicKey.toBase58()}/transactions?api-key=${apiKey}`;
@@ -192,7 +197,8 @@ export const apiService = {
       const response = await fetch(url);
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
-      return response.json();
+      const transactions: HeliusApiTransaction[] = await response.json();
+      return transactions;
     } catch (error) {
       console.error("Failed to get transactions:", error);
       return null;
