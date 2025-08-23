@@ -6,7 +6,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import { SolanaProvider } from "@/components/provider/Solana";
 import { Toaster } from "@/components/ui/sonner";
 import { DashboardDataProvider } from "@/context/DashboardDataProvider";
- 
+import { Analytics } from "@vercel/analytics/next"
 export const metadata: Metadata = {
   title: "Solana Dashboard with Wallet Authentication",
   description: "A Solana dashboard with wallet authentication and transaction capabilities",
@@ -41,6 +41,7 @@ export default function RootLayout({
             },
           }}
         />
+        <Analytics />
       </body>
     </html>
   );
